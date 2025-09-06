@@ -10,15 +10,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Build with Gradle
+        uses: gradle/actions/build-action@v3
         with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
-          java-version: '21'
-          cache: 'gradle'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v3
-
-      - name: Execute Gradle build
-        run: ./gradlew build
+          checkout: false
+          java-version: 21
+          arguments: build
