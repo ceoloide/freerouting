@@ -11,12 +11,12 @@ plugins {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
 }
 
 java.toolchain {
-    languageVersion = JavaLanguageVersion.of 21
+    languageVersion = JavaLanguageVersion.of 22
 }
 
 [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
