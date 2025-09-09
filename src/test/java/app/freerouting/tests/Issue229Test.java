@@ -9,7 +9,7 @@ public class Issue229Test extends TestBasedOnAnIssue
   @Test
   void test_Issue_229_Keepout_zone_was_not_exported_correctly()
   {
-    var job = GetRoutingJob("Issue229-display-8-digit-hc595.dsn");
+    var job = GetRoutingJob("Issue229-display-8-digit-hc595.dsn", 43L);
 
     job = RunRoutingJob(job, job.routerSettings);
 

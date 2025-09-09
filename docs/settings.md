@@ -86,6 +86,7 @@ The primary way to configure Freerouting is through a JSON settings file. This f
 - **`plane_via_costs`**: Cost factor for using vias on plane layers.
 - **`start_ripup_costs`**: Cost factor for ripping up existing traces.
 - **`automatic_neckdown`**: Enables or disables automatic neckdown of traces.
+- **`random_seed`**: A seed for the random number generator. If provided, the autorouter will behave deterministically. If not provided, it will be non-deterministic for each pass.
 
 #### **`usage_and_diagnostic_data` Section**
 
