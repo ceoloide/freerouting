@@ -8,12 +8,14 @@ import app.freerouting.core.scoring.BoardStatistics;
 import app.freerouting.management.RoutingJobScheduler;
 import app.freerouting.management.SessionManager;
 import app.freerouting.settings.GlobalSettings;
+import app.freerouting.logger.FRLogger;
 import app.freerouting.settings.RouterSettings;
 import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Random;
 import java.util.UUID;
 
 public class TestBasedOnAnIssue
@@ -29,7 +31,7 @@ public class TestBasedOnAnIssue
     scheduler = RoutingJobScheduler.getInstance();
   }
 
-  protected RoutingJob GetRoutingJob(String filename)
+  protected RoutingJob GetRoutingJob(String filename, Long random_seed)
   {
     // Create a new session
     UUID sessionId = UUID.randomUUID();
@@ -73,6 +75,7 @@ public class TestBasedOnAnIssue
           .getData()
           .readAllBytes(), job.input.format);
       var jobSettings = new RouterSettings(statsBefore.layers.totalCount);
+      jobSettings.random_seed = random_seed;
       job.routerSettings.applyNewValuesFrom(jobSettings);
     } catch (IOException e)
     {
@@ -80,6 +83,13 @@ public class TestBasedOnAnIssue
     }
 
     return job;
+  }
+
+  protected RoutingJob GetRoutingJob(String filename)
+  {
+    long random_seed = new Random().nextLong();
+    FRLogger.debug("Using random seed for test: " + random_seed);
+    return GetRoutingJob(filename, random_seed);
   }
 
   protected RoutingJob RunRoutingJob(RoutingJob job, RouterSettings settings)
