@@ -51,52 +51,49 @@ public class ScopeKeyword extends Keyword
   /**
    * Reads the next scope of this keyword from dsn file.
    */
-  public boolean read_scope(ReadScopeParameter p_par)
-  {
-    Object next_token = null;
-    for (; ; )
-    {
-      Object prev_token = next_token;
-      try
-      {
+  public boolean read_scope(ReadScopeParameter p_par) {
+    for (; ; ) {
+      Object next_token;
+      try {
         next_token = p_par.scanner.next_token();
-      } catch (IOException e)
-      {
+      } catch (IOException e) {
         FRLogger.error("ScopeKeyword.read_scope: IO error scanning file", e);
         return false;
       }
-      if (next_token == null)
-      {
-        // end of file
+
+      if (next_token == null) {
+        // end of file, but scope was not closed.
+        FRLogger.warn("ScopeKeyword.read_scope: unexpected end of file at '" + p_par.scanner.get_scope_identifier() + "'");
+        return false;
+      }
+
+      if (next_token == CLOSED_BRACKET) {
+        // end of scope
         return true;
       }
-      if (next_token == CLOSED_BRACKET)
-      {
-        // end of scope
-        break;
-      }
 
-      if (prev_token == OPEN_BRACKET)
-      {
-        ScopeKeyword next_scope;
-        // a new scope is expected
-        if (next_token instanceof ScopeKeyword)
-        {
-          // read the next scope, which is the "structure" part of the DSN file
-          next_scope = (ScopeKeyword) next_token;
-          if (!next_scope.read_scope(p_par))
-          {
+      if (next_token == OPEN_BRACKET) {
+        // This is the start of a child scope.
+        Object keyword_token;
+        try {
+          keyword_token = p_par.scanner.next_token();
+        } catch (IOException e) {
+          FRLogger.error("ScopeKeyword.read_scope: IO error scanning file", e);
+          return false;
+        }
+
+        if (keyword_token instanceof ScopeKeyword) {
+          ScopeKeyword next_scope = (ScopeKeyword) keyword_token;
+          if (!next_scope.read_scope(p_par)) {
             return false;
           }
-
-        }
-        else
-        {
-          // skip unknown scope
+        } else {
+          // Not a scope keyword we have a specific reader for, skip it.
           skip_scope(p_par.scanner);
         }
       }
+      // If it's not a bracket, it's some other content within the scope that this generic reader doesn't understand.
+      // The original code implicitly ignored this, so we will too.
     }
-    return true;
   }
 }

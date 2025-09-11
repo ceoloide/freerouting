@@ -1,0 +1,41 @@
+(pcb "Issue305-FlipStyle"
+  (parser
+    (string_quote ")
+    (space_in_quoted_tokens on)
+    (host_cad "KiCad's Pcbnew")
+    (host_version "8.0.7-8.0.7-0~ubuntu24.04.1")
+    (generated_by_freerouting)
+  )
+  (resolution um 10)
+  (unit um)
+  (structure
+    (layer F.Cu
+      (type signal)
+    )
+    (layer B.Cu
+      (type signal)
+    )
+    (boundary
+      (rect pcb -200.0 -600200.0 600200.0 200.0)
+    )
+  )
+  (placement
+    (place_control (flip_style rotate_first))
+    (component "endpoint_footprint"
+      (place X1 500000.0 -30000.0 front 0)
+    )
+  )
+  (library
+    (image "endpoint_footprint"
+      (side front)
+      (pin "Rect[T]Pad_5000x5000_um" 1 2500.0 -2500.0)
+    )
+    (padstack "Rect[T]Pad_5000x5000_um"
+      (shape
+        (rect F.Cu -2500.0 -2500.0 2500.0 2500.0)
+      )
+      (attach off)
+    )
+  )
+  (network)
+)
