@@ -328,6 +328,11 @@ public class Freerouting
     {
       FRLogger.error("Couldn't load the input file '" + globalSettings.design_input_filename + "'", e);
     }
+    if (routingJob.input == null)
+    {
+      FRLogger.error("Couldn't initialize the routing job from the input file.", null);
+      System.exit(1);
+    }
     cliSession.addJob(routingJob);
 
     var desiredOutputFile = new File(globalSettings.design_output_filename);
