@@ -107,7 +107,7 @@ public class AutorouterAndRouteOptimizerThread extends InteractiveActionThread
       @Override
       public void onBoardSnapshotEvent(BoardSnapshotEvent event)
       {
-        boardManager.get_panel().board_frame.save_intermediate_stage_file();
+        boardManager.get_panel().board_frame.saveIntermediateStageFile();
       }
     });
 

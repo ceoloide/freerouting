@@ -43,8 +43,6 @@ public class WindowNets extends WindowObjectListWithFilter
     rules_nets_filter_incompletes_button.setToolTipText(tm.getText("filter_incompletes_tooltip"));
     rules_nets_filter_incompletes_button.addActionListener(new FilterIncompletesListener());
     rules_nets_filter_incompletes_button.addActionListener(evt -> FRAnalytics.buttonClicked("rules_nets_filter_incompletes_button", rules_nets_filter_incompletes_button.getText()));
-
-    p_board_frame.set_context_sensitive_help(this, "WindowObjectList_Nets");
   }
 
   /**

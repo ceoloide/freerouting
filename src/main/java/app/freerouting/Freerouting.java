@@ -40,6 +40,9 @@ public class Freerouting
   public static final String VERSION_NUMBER_STRING = "v" + Constants.FREEROUTING_VERSION + " (build-date: " + Constants.FREEROUTING_BUILD_DATE + ")";
   public static GlobalSettings globalSettings;
   private static Server apiServer; // API server instance
+  private static String design_input_filename;
+  private static String design_output_filename;
+  private static String design_rules_filename;
 
   /**
    * The entry point of the Freerouting application
@@ -185,6 +188,22 @@ public class Freerouting
     FRLogger.debug("UTC Time: " + globalSettings.environmentSettings.appStartedAt);
 
     // parse the command line arguments
+    for (int i = 0; i < args.length; ++i) {
+      if (args[i].startsWith("-de")) {
+        // the design file is provided
+        if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
+          design_input_filename = args[i + 1];
+        }
+      } else if (args[i].startsWith("-do")) {
+        if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
+          design_output_filename = args[i + 1];
+        }
+      } else if (args[i].startsWith("-dr")) {
+        if (args.length > i + 1 && !args[i + 1].startsWith("-")) {
+          design_rules_filename = args[i + 1];
+        }
+      }
+    }
     globalSettings.applyCommandLineArguments(args);
 
     FRLogger.debug("GUI Language: " + globalSettings.currentLocale);
@@ -272,7 +291,7 @@ public class Freerouting
     // Initialize the GUI
     if (globalSettings.guiSettings.isEnabled)
     {
-      if (!WindowWelcome.InitializeGUI(globalSettings))
+      if (!WindowWelcome.InitializeGUI(globalSettings, design_input_filename, design_output_filename, design_rules_filename))
       {
         FRLogger.error("Couldn't initialize the GUI", null);
         globalSettings.guiSettings.isEnabled = false;
@@ -308,7 +327,7 @@ public class Freerouting
 
   private static void InitializeCLI(GlobalSettings globalSettings)
   {
-    if ((globalSettings.design_input_filename == null) || (globalSettings.design_output_filename == null))
+    if ((design_input_filename == null) || (design_output_filename == null))
     {
       FRLogger.error("Both an input file and an output file must be specified with command line arguments if you are running in CLI mode.", null);
       System.exit(1);
@@ -323,23 +342,23 @@ public class Freerouting
     RoutingJob routingJob = new RoutingJob(cliSession.id);
     try
     {
-      routingJob.setInput(globalSettings.design_input_filename);
+      routingJob.setInput(design_input_filename);
     } catch (Exception e)
     {
-      FRLogger.error("Couldn't load the input file '" + globalSettings.design_input_filename + "'", e);
+      FRLogger.error("Couldn't load the input file '" + design_input_filename + "'", e);
     }
     cliSession.addJob(routingJob);
 
-    var desiredOutputFile = new File(globalSettings.design_output_filename);
+    var desiredOutputFile = new File(design_output_filename);
     if ((desiredOutputFile != null) && desiredOutputFile.exists())
     {
       if (!desiredOutputFile.delete())
       {
-        FRLogger.warn("Couldn't delete the file '" + globalSettings.design_output_filename + "'");
+        FRLogger.warn("Couldn't delete the file '" + design_output_filename + "'");
       }
     }
 
-    routingJob.tryToSetOutputFile(new File(globalSettings.design_output_filename));
+    routingJob.tryToSetOutputFile(new File(design_output_filename));
 
     routingJob.routerSettings = Freerouting.globalSettings.routerSettings.clone();
     routingJob.routerSettings.setLayerCount(routingJob.input.statistics.layers.totalCount);
@@ -366,13 +385,13 @@ public class Freerouting
     {
       try
       {
-        Path outputFilePath = Path.of(globalSettings.design_output_filename);
+        Path outputFilePath = Path.of(routingJob.output.getAbsolutePath());
         Files.write(outputFilePath, routingJob.output
             .getData()
             .readAllBytes());
       } catch (IOException e)
       {
-        FRLogger.error("Couldn't save the output file '" + globalSettings.design_output_filename + "'", e);
+        FRLogger.error("Couldn't save the output file '" + routingJob.output.getAbsolutePath() + "'", e);
       }
     }
   }

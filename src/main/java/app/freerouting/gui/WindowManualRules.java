@@ -109,8 +109,6 @@ public class WindowManualRules extends BoardSavableSubWindow
     gridbag.setConstraints(empty_label, gridbag_constraints);
     main_panel.add(empty_label);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowManualRules");
-
     this.pack();
     this.setResizable(false);
   }

@@ -101,8 +101,6 @@ public class WindowNetClasses extends BoardSavableSubWindow
     rules_netclasses_filter_incompletes_button.addActionListener(new FilterIncompletesListener());
     rules_netclasses_filter_incompletes_button.addActionListener(evt -> FRAnalytics.buttonClicked("rules_netclasses_filter_incompletes_button", rules_netclasses_filter_incompletes_button.getText()));
 
-    p_board_frame.set_context_sensitive_help(this, "WindowNetClasses");
-
     this.add(main_panel);
     this.pack();
     this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);

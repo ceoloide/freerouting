@@ -172,8 +172,6 @@ public class WindowVia extends BoardSavableSubWindow
     rules_vias_rules_remove_button.addActionListener(evt -> FRAnalytics.buttonClicked("rules_vias_rules_remove_button", rules_vias_rules_remove_button.getText()));
     via_rule_button_panel.add(rules_vias_rules_remove_button);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowVia");
-
     this.add(main_panel);
     this.pack();
     this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);

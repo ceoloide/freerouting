@@ -61,8 +61,6 @@ public class WindowEditVias extends BoardSavableSubWindow
     rules_vias_vias_edit_remove_button.addActionListener(evt -> FRAnalytics.buttonClicked("rules_vias_vias_edit_remove_button", rules_vias_vias_edit_remove_button.getText()));
     via_info_button_panel.add(rules_vias_vias_edit_remove_button);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowVia_EditVia");
-
     this.add(main_panel);
     this.pack();
   }

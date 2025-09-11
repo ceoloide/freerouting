@@ -23,7 +23,7 @@ public class SystemControllerV1
     OperatingSystemMXBean osBean = ManagementFactory.getOperatingSystemMXBean();
     if (osBean instanceof com.sun.management.OperatingSystemMXBean)
     {
-      return ((com.sun.management.OperatingSystemMXBean) osBean).getSystemCpuLoad() * 100;
+      return ((com.sun.management.OperatingSystemMXBean) osBean).getCpuLoad() * 100;
     }
     return -1;
   }
