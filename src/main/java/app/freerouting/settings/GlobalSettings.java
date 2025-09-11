@@ -59,24 +59,6 @@ public class GlobalSettings implements Serializable
   @SerializedName("version")
   public String version = Constants.FREEROUTING_VERSION;
   public transient boolean show_help_option = false;
-  /**
-   * The design_input_filename field is deprecated and should not be used. They are kept here for compatibility reasons.
-   * Its function is now moved to the input.getFilename() method of RoutingJob object.
-   */
-  @Deprecated
-  public transient String design_input_filename;
-  /**
-   * The design_output_filename field is deprecated and should not be used. They are kept here for compatibility reasons.
-   * Its function is now moved to the output.getFilename() method of RoutingJob object.
-   */
-  @Deprecated
-  public transient String design_output_filename;
-  /**
-   * The design_rules_filename field is deprecated and should not be used. They are kept here for compatibility reasons.
-   * Its function is now removed, .rules files are considered to be deprecated, and other configuration methods should be used instead.
-   */
-  @Deprecated
-  public transient String design_rules_filename;
   public transient Locale currentLocale = Locale.getDefault();
 
   public GlobalSettings()
@@ -239,34 +221,12 @@ public class GlobalSettings implements Serializable
             setValue(parts[0], parts[1]);
           }
         }
-        else if (p_args[i].startsWith("-de"))
-        {
-          // the design file is provided
-          if (p_args.length > i + 1 && !p_args[i + 1].startsWith("-"))
-          {
-            design_input_filename = p_args[i + 1];
-          }
-        }
         else if (p_args[i].startsWith("-di"))
         {
           // the design directory is provided
           if (p_args.length > i + 1 && !p_args[i + 1].startsWith("-"))
           {
             guiSettings.inputDirectory = p_args[i + 1];
-          }
-        }
-        else if (p_args[i].startsWith("-do"))
-        {
-          if (p_args.length > i + 1 && !p_args[i + 1].startsWith("-"))
-          {
-            design_output_filename = p_args[i + 1];
-          }
-        }
-        else if (p_args[i].startsWith("-dr"))
-        {
-          if (p_args.length > i + 1 && !p_args[i + 1].startsWith("-"))
-          {
-            design_rules_filename = p_args[i + 1];
           }
         }
         else if (p_args[i].startsWith("-mp"))

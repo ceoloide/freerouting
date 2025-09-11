@@ -333,8 +333,6 @@ public class WindowAutorouteParameter extends BoardSavableSubWindow
     gridbag.setConstraints(applyValuesNote, gridbag_constraints);
     main_panel.add(applyValuesNote, gridbag_constraints);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowAutorouteParameter");
-
     this.refresh();
     this.pack();
     this.setResizable(false);

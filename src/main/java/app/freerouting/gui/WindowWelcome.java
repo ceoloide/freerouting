@@ -116,7 +116,7 @@ public class WindowWelcome extends WindowBase
     setResizable(false);
   }
 
-  public static boolean InitializeGUI(GlobalSettings globalSettings)
+  public static boolean InitializeGUI(GlobalSettings globalSettings, String design_input_filename, String design_output_filename, String design_rules_filename)
   {
     // Start a new Freerouting session
     var guiSession = SessionManager
@@ -151,14 +151,14 @@ public class WindowWelcome extends WindowBase
     RoutingJob routingJob = null;
 
     // check if we can load a file instantly at startup
-    if (globalSettings.design_input_filename != null)
+    if (design_input_filename != null)
     {
       // let's create a job in our session and queue it
-      FRLogger.info("Opening '" + globalSettings.design_input_filename + "'...");
+      FRLogger.info("Opening '" + design_input_filename + "'...");
       routingJob = new RoutingJob(guiSession.id);
       try
       {
-        routingJob.setInput(globalSettings.design_input_filename);
+        routingJob.setInput(design_input_filename);
       } catch (Exception e)
       {
         FRLogger.error("Couldn't read the file", e);
@@ -166,14 +166,14 @@ public class WindowWelcome extends WindowBase
 
       if (routingJob.input.format == FileFormat.UNKNOWN)
       {
-        FRLogger.warn(tm.getText("message_6") + " " + globalSettings.design_input_filename + " " + tm.getText("message_7"));
+        FRLogger.warn(tm.getText("message_6") + " " + design_input_filename + " " + tm.getText("message_7"));
         return false;
       }
       guiSession.addJob(routingJob);
 
-      String message = tm.getText("loading_design") + " " + globalSettings.design_input_filename;
+      String message = tm.getText("loading_design") + " " + design_input_filename;
       WindowMessage welcome_window = WindowMessage.show(message);
-      final BoardFrame new_frame = create_board_frame(routingJob, null, globalSettings);
+      final BoardFrame new_frame = create_board_frame(routingJob, null, globalSettings, design_rules_filename);
       welcome_window.dispose();
       if (new_frame == null)
       {
@@ -189,19 +189,19 @@ public class WindowWelcome extends WindowBase
       new_frame.board_panel.board_handling.set_hybrid_ratio(globalSettings.routerSettings.optimizer.hybridRatio);
       new_frame.board_panel.board_handling.set_item_selection_strategy(globalSettings.routerSettings.optimizer.itemSelectionStrategy);
 
-      if (globalSettings.design_output_filename != null)
+      if (design_output_filename != null)
       {
         // if the design_output_filename file exists we need to delete it before setting it
-        var desiredOutputFile = new File(globalSettings.design_output_filename);
+        var desiredOutputFile = new File(design_output_filename);
         if ((desiredOutputFile != null) && desiredOutputFile.exists())
         {
           if (!desiredOutputFile.delete())
           {
-            FRLogger.warn("Couldn't delete the file '" + globalSettings.design_output_filename + "'");
+            FRLogger.warn("Couldn't delete the file '" + design_output_filename + "'");
           }
         }
 
-        routingJob.tryToSetOutputFile(new File(globalSettings.design_output_filename));
+        routingJob.tryToSetOutputFile(new File(design_output_filename));
 
         // we need to set up a listener to save the design file when the autorouter is running
         new_frame.board_panel.board_handling.autorouter_listener = new ThreadActionListener()
@@ -214,13 +214,13 @@ public class WindowWelcome extends WindowBase
           @Override
           public void autorouterAborted()
           {
-            ExportBoardToFile(globalSettings.design_output_filename);
+            ExportBoardToFile(design_output_filename);
           }
 
           @Override
           public void autorouterFinished()
           {
-            ExportBoardToFile(globalSettings.design_output_filename);
+            ExportBoardToFile(design_output_filename);
           }
 
           private void ExportBoardToFile(String filename)
@@ -286,7 +286,7 @@ public class WindowWelcome extends WindowBase
       }
 
       // start the auto-router automatically if both input and output files were passed as a parameter
-      if ((globalSettings.design_input_filename != null) && (globalSettings.design_output_filename != null))
+      if ((design_input_filename != null) && (design_output_filename != null))
       {
         // Add a model dialog with timeout to confirm the autorouter start with the default settings
         final String START_NOW_TEXT = tm.getText("auto_start_routing_startnow_button");
@@ -377,7 +377,7 @@ public class WindowWelcome extends WindowBase
       if (!globalSettings.featureFlags.fileLoadDialogAtStartup)
       {
         // we don't use the file load dialog at startup anymore, we load a blank board instead
-        final BoardFrame new_frame = create_board_frame(null, null, globalSettings);
+      final BoardFrame new_frame = create_board_frame(null, null, globalSettings, null);
         if (new_frame == null)
         {
           FRLogger.warn("Couldn't create window frame");
@@ -398,7 +398,7 @@ public class WindowWelcome extends WindowBase
    * Creates a new board frame containing the data of the input design file. Returns null, if an
    * error occurred.
    */
-  private static BoardFrame create_board_frame(RoutingJob routingJob, JTextField p_message_field, GlobalSettings globalSettings)
+  private static BoardFrame create_board_frame(RoutingJob routingJob, JTextField p_message_field, GlobalSettings globalSettings, String design_rules_filename)
   {
     TextManager tm = new TextManager(WindowWelcome.class, globalSettings.currentLocale);
 
@@ -465,7 +465,7 @@ public class WindowWelcome extends WindowBase
       String rules_file_name;
       String parent_folder_name;
       String confirm_import_rules_message;
-      if (globalSettings.design_rules_filename == null)
+      if (design_rules_filename == null)
       {
         rules_file_name = design_name + ".rules";
         parent_folder_name = routingJob.input.getDirectoryPath();
@@ -473,7 +473,7 @@ public class WindowWelcome extends WindowBase
       }
       else
       {
-        rules_file_name = globalSettings.design_rules_filename;
+        rules_file_name = design_rules_filename;
         parent_folder_name = null;
         confirm_import_rules_message = null;
       }
@@ -562,7 +562,7 @@ public class WindowWelcome extends WindowBase
     message_field.setText(message);
     WindowMessage welcome_window = WindowMessage.show(message);
     welcome_window.setTitle(message);
-    BoardFrame new_frame = create_board_frame(routingJob, message_field, globalSettings);
+    BoardFrame new_frame = create_board_frame(routingJob, message_field, globalSettings, null);
     welcome_window.dispose();
     if (new_frame == null)
     {

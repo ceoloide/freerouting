@@ -27,7 +27,6 @@ public class WindowRouteStubs extends CleanupWindows
 
     this.setTitle(tm.getText("route_stubs"));
     this.list_empty_message.setText(tm.getText("no_route_stubs_found"));
-    p_board_frame.set_context_sensitive_help(this, "WindowObjectList_RouteStubs");
   }
 
   @Override

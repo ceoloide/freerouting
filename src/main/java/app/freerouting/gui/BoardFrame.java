@@ -541,8 +541,7 @@ public class BoardFrame extends WindowBase
   }
 
 
-  @Deprecated
-  public boolean save_intermediate_stage_file()
+  public boolean saveIntermediateStageFile()
   {
     if ((intermediate_stage_file_last_saved_at != null) && (intermediate_stage_file_last_saved_at
         .plusSeconds(30)

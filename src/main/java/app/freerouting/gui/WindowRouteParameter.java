@@ -360,8 +360,6 @@ public class WindowRouteParameter extends BoardSavableSubWindow
     route_detail_outline_keepout_check_box.setToolTipText(tm.getText("keepout_outside_outline_tooltip"));
     main_panel.add(route_detail_outline_keepout_check_box, gridbag_constraints);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowRouteParameter");
-
     this.refresh();
     this.pack();
     this.setResizable(false);

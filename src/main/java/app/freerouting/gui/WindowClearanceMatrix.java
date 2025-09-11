@@ -99,8 +99,6 @@ public class WindowClearanceMatrix extends BoardSavableSubWindow
 
     main_panel.add(south_panel, BorderLayout.SOUTH);
 
-    p_board_frame.set_context_sensitive_help(this, "WindowClearanceMatrix");
-
     this.add(main_panel);
     this.pack();
   }
