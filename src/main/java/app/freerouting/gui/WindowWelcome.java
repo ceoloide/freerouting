@@ -164,7 +164,7 @@ public class WindowWelcome extends WindowBase
         FRLogger.error("Couldn't read the file", e);
       }
 
-      if (routingJob.input.format == FileFormat.UNKNOWN)
+      if (routingJob.input == null || routingJob.input.format == FileFormat.UNKNOWN)
       {
         FRLogger.warn(tm.getText("message_6") + " " + globalSettings.design_input_filename + " " + tm.getText("message_7"));
         return false;
@@ -403,7 +403,7 @@ public class WindowWelcome extends WindowBase
     TextManager tm = new TextManager(WindowWelcome.class, globalSettings.currentLocale);
 
     InputStream input_stream = null;
-    if ((routingJob == null) || (routingJob.input.getFile() == null))
+    if ((routingJob == null) || (routingJob.input == null) || (routingJob.input.getFile() == null))
     {
       routingJob = new RoutingJob(SessionManager
           .getInstance()
