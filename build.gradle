@@ -35,14 +35,6 @@ testing {
     suites {
         test {
             useJUnitJupiter()
-            targets {
-                all {
-                    testTask.configure {
-                        exclude '**/Issue026Test.class'
-                        exclude '**/Issue159Test.class'
-                    }
-                }
-            }
         }
 
         integrationTest(JvmTestSuite) {
