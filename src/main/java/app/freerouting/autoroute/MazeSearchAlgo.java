@@ -537,6 +537,9 @@ public class MazeSearchAlgo
         continue;
       }
       TileShape target_shape = ((Connectable) to_door.item).get_trace_connection_shape(this.autoroute_engine.autoroute_search_tree, to_door.tree_entry_no);
+      if (target_shape == null) {
+        continue;
+      }
       FloatPoint connection_point = target_shape.nearest_point_approx(p_shape_entry_middle);
       if (!p_next_room_is_thick)
       {

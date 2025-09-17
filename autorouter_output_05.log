@@ -1,0 +1,96 @@
+2025-09-17 01:07:40.539 INFO   Freerouting v2.1.2-SNAPSHOT (build-date: 2025-09-17)
+2025-09-17 01:07:40.642 WARN   No default constructor found for field: currentLocale
+2025-09-17 01:07:40.643 INFO   Settings were loaded from freerouting.json
+2025-09-17 01:07:40.651 WARN   Couldn't get screen resolution. If you are running in a headless environment, disable the GUI by setting gui.enabled to false.
+2025-09-17 01:07:42.077 INFO   New version available: v2.1.0
+2025-09-17 01:07:42.239 INFO   [D093EA\53730C] Job 'D093EA\53730C' started at 2025-09-17T01:07:42.237513653Z
+2025-09-17 01:07:57.307 INFO   [D093EA\53730C] Auto-router pass #1 on board 'e101cb5686c58ce34fd073b624cf4e09' was completed in 14.79 seconds with the score of 587.90 (178 unrouted), using 108.75 CPU seconds and 4792 MB memory.
+2025-09-17 01:08:07.229 INFO   [D093EA\53730C] Auto-router pass #2 on board '28e649d7f702818bc33b6f771c4556f8' was completed in 9.88 seconds with the score of 614.18 (173 unrouted), using 277.90 CPU seconds and 8212 MB memory.
+2025-09-17 01:08:17.350 INFO   [D093EA\53730C] Auto-router pass #3 on board '5ed57ff5a2f3914b021b7e0e3fd6b0b5' was completed in 10.09 seconds with the score of 639.94 (168 unrouted), using 590.82 CPU seconds and 12451 MB memory.
+2025-09-17 01:08:38.781 INFO   [D093EA\53730C] Auto-router pass #4 on board '262f33bf2c93f5d0380e990dd7993b80' was completed in 21.40 seconds with the score of 983.52 (3 unrouted), using 1512.43 CPU seconds and 21538 MB memory.
+2025-09-17 01:08:39.414 INFO   [D093EA\53730C] Auto-router pass #5 on board '8a042a300a83e3ab2bb96b526642f63f' was completed in 0.56 seconds with the score of 983.35 (3 unrouted), using 1567.03 CPU seconds and 21932 MB memory.
+2025-09-17 01:08:40.036 INFO   [D093EA\53730C] Auto-router pass #6 on board '34160cd5c27312eb837ec48c539e958d' was completed in 0.57 seconds with the score of 983.38 (3 unrouted), using 1567.03 CPU seconds and 21932 MB memory.
+2025-09-17 01:08:40.663 INFO   [D093EA\53730C] Auto-router pass #7 on board '24583d835ced757bb24f7cd830bdf2c4' was completed in 0.58 seconds with the score of 983.38 (3 unrouted), using 1622.61 CPU seconds and 22340 MB memory.
+2025-09-17 01:08:41.429 INFO   [D093EA\53730C] Auto-router pass #8 on board '5766c33aa48c453bed45e14543f9c089' was completed in 0.72 seconds with the score of 984.61 (2 unrouted), using 1679.17 CPU seconds and 22757 MB memory.
+2025-09-17 01:08:41.890 INFO   [D093EA\53730C] Auto-router pass #9 on board '5c068453bfd46d5bd44c9a070c069546' was completed in 0.41 seconds with the score of 984.57 (2 unrouted), using 1679.17 CPU seconds and 22757 MB memory.
+2025-09-17 01:08:42.346 INFO   [D093EA\53730C] Auto-router pass #10 on board '2094cd3d0e009dd91805f6462b27901f' was completed in 0.41 seconds with the score of 984.57 (2 unrouted), using 1736.71 CPU seconds and 23175 MB memory.
+2025-09-17 01:08:42.816 INFO   [D093EA\53730C] Auto-router pass #11 on board '3ab69d9b857641df26bf0b7f9c84dbaf' was completed in 0.42 seconds with the score of 984.57 (2 unrouted), using 1736.71 CPU seconds and 23175 MB memory.
+2025-09-17 01:08:43.330 INFO   [D093EA\53730C] Auto-router pass #12 on board '3ab69d9b857641df26bf0b7f9c84dbaf' was completed in 0.49 seconds with the score of 985.92 (1 unrouted), using 1795.22 CPU seconds and 23583 MB memory.
+2025-09-17 01:08:43.621 INFO   [D093EA\53730C] Auto-router pass #13 on board '6db1246ec5667335aebf610141f2fb8e' was completed in 0.24 seconds with the score of 985.92 (1 unrouted), using 1795.22 CPU seconds and 23583 MB memory.
+2025-09-17 01:08:43.887 INFO   [D093EA\53730C] Auto-router pass #14 on board '6db1246ec5667335aebf610141f2fb8e' was completed in 0.24 seconds with the score of 985.92 (1 unrouted), using 1795.22 CPU seconds and 23583 MB memory.
+2025-09-17 01:08:44.159 INFO   [D093EA\53730C] Auto-router pass #15 on board '6db1246ec5667335aebf610141f2fb8e' was completed in 0.24 seconds with the score of 985.92 (1 unrouted), using 1795.22 CPU seconds and 23583 MB memory.
+2025-09-17 01:08:44.558 INFO   [D093EA\53730C] Restoring an earlier board that has the score of 985.92 (1 unrouted).
+2025-09-17 01:08:44.559 INFO   [D093EA\53730C] Auto-router pass #16 on board '6db1246ec5667335aebf610141f2fb8e' was completed in 0.38 seconds with the score of 985.92 (1 unrouted), using 1854.71 CPU seconds and 23996 MB memory.
+2025-09-17 01:08:44.810 INFO   [D093EA\53730C] Auto-router pass #17 on board '6db1246ec5667335aebf610141f2fb8e' was completed in 0.23 seconds with the score of 987.26, using 1854.71 CPU seconds and 23996 MB memory.
+2025-09-17 01:08:44.876 INFO   [D093EA\53730C] Auto-router pass #18 on board '0cd6ae1118a9c7e24a32fb484ef3c8f6' was completed in 0.02 seconds with the score of 987.26, using 1854.71 CPU seconds and 23996 MB memory.
+{
+  "host": "KiCad's Pcbnew,7.0.5-0",
+  "unit": "mm",
+  "board": {
+    "bounding_box": {
+      "x": 1722.81,
+      "y": 653.282,
+      "width": -237.158,
+      "height": -1035.29
+    },
+    "size": {
+      "x": 0.0,
+      "y": 0.0,
+      "width": 1959.968,
+      "height": 1688.572
+    }
+  },
+  "layers": {
+    "total_count": 2,
+    "signal_count": 2
+  },
+  "items": {
+    "total_count": 2745,
+    "trace_count": 407,
+    "via_count": 11,
+    "conduction_area_count": 0,
+    "drill_item_count": 362,
+    "pin_count": 0,
+    "component_count": 1518,
+    "other_count": 447
+  },
+  "components": {
+    "total_count": 68
+  },
+  "pads": {
+    "total_count": 362
+  },
+  "nets": {
+    "total_count": 45,
+    "class_count": 2
+  },
+  "connections": {
+    "maximum_count": 735,
+    "incomplete_count": 0
+  },
+  "traces": {
+    "total_count": 407,
+    "total_segment_count": 986,
+    "total_length": 31122.537,
+    "total_weighted_length": 9.9372616E7,
+    "average_length": 76.46815,
+    "total_vertical_length": 5316.948,
+    "total_horizontal_length": 9733.666,
+    "total_angled_length": 11671.673
+  },
+  "bends": {
+    "total_count": 579,
+    "90_degree_count": 12,
+    "45_degree_count": 567,
+    "other_angle_count": 0
+  },
+  "vias": {
+    "total_count": 11,
+    "through_hole_count": 11,
+    "blind_count": 0,
+    "buried_count": 0
+  },
+  "clearance_violations": {
+    "total_count": 0
+  }
+}
