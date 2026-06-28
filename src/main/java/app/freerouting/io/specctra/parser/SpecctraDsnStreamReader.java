@@ -245,7 +245,7 @@ public class SpecctraDsnStreamReader implements IJFlexScanner {
   private static final int[] ZZ_ATTRIBUTE = zzUnpackAttribute();
   public static String scope_identifier = "";
   public static NumberFormat nf;
-  /* user code: */ StringBuffer stringBuffer = new StringBuffer();
+  /* user code: */ StringBuilder stringBuffer = new StringBuilder();
   /**
    * the input device
    */
