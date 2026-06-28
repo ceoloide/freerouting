@@ -214,7 +214,7 @@ public class TextManager {
   public static String unescapeUnicode(String text) {
     Pattern pattern = Pattern.compile("\\\\u(\\p{XDigit}{4})");
     Matcher matcher = pattern.matcher(text);
-    StringBuffer result = new StringBuffer();
+    StringBuilder result = new StringBuilder();
 
     while (matcher.find()) {
       String hexCode = matcher.group(1);

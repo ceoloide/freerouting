@@ -524,7 +524,7 @@ class SpecctraDsnFileReader implements IJFlexScanner {
   private static final int[] ZZ_ATTRIBUTE = zzUnpackAttribute();
   public static NumberFormat nf;
   /* user code: */
-  StringBuffer stringBuffer = new StringBuffer();
+  StringBuilder stringBuffer = new StringBuilder();
   /** the input device */
   private java.io.Reader zzReader;
   /** the current state of the DFA */
