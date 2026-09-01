@@ -11,7 +11,7 @@ package designformats.specctra;
 /* %debug */
 
 %{
-  StringBuffer string = new StringBuffer();
+  StringBuilder string = new StringBuilder();
 %}
 
 LineTerminator = \r|\n|\r\n
