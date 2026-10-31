@@ -481,6 +481,13 @@ The autorouter is the "make it work" stage. It solves missing connections one at
 
 The autorouter may also temporarily rip up nearby conflicting traces or vias if needed to find a legal route. Its job is to turn an incomplete design into one that is electrically connected.
 
+The autorouter's local pull-tight and pass-end cleanup still run when the separate optimizer
+stage is disabled. For a routing-generated trace/via violation, the opt-in
+`TraceViaClearanceDiagnostic` in `autoroute.pipeline` checks comprehensive DRC at connection
+insertion, local pull-tight, connection bookkeeping, and pass-cleanup boundaries. It reports the
+first foreign-net trace/via pair absent from its initial baseline, without rollback or route
+rejection. See [the diagnostic instructions](developer/trace-via-diagnostic.md).
+
 #### Preserved Traces and Centerline Junction Connectivity
 
 Preserved traces (`USER_FIXED` and `SYSTEM_FIXED`, such as KiCad footprint tracks or SPECCTRA DSN `route`/`fix` wires) must retain their exact geometry without mutation or splitting throughout routing, normalization, and export:

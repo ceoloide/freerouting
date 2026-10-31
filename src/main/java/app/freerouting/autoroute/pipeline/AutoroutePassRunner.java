@@ -50,6 +50,7 @@ final class AutoroutePassRunner {
       router.resetPassProfile();
     }
     try {
+      router.clearanceDiagnostic.beginPass(router.board, passNo);
       long itemSelectionStart = BatchAutorouter.isBenchmarkProfileEnabled() ? System.nanoTime() : 0;
       List<Item> autorouteItemList = router.getAutorouteItems(router.board);
       dropDesignBlockedItems(autorouteItemList);
@@ -109,6 +110,7 @@ final class AutoroutePassRunner {
       int notRouted = 0;
       int routed = 0;
       int skipped = 0;
+      int connectionIndex = 0;
       for (Item currentItem : autorouteItemList) {
         if (router.thread.isStopAutoRouterRequested()) {
           break;
@@ -130,6 +132,11 @@ final class AutoroutePassRunner {
             break;
           }
           router.totalItemsRouted++;
+          router.clearanceDiagnostic.beginConnection(
+              router.board,
+              ++connectionIndex,
+              router.totalItemsRouted,
+              currentItem.getNetNumber(i));
           router.board.startMarkingChangedArea();
 
           SortedSet<Item> rippedItemList = new TreeSet<>();
@@ -204,6 +211,7 @@ final class AutoroutePassRunner {
             }
             ++notRouted;
           }
+          router.clearanceDiagnostic.checkpoint(router.board, "after_connection_bookkeeping");
           --itemsToGoCount;
           rippedItemCount += rippedItemList.size();
           updateProgress(
@@ -211,12 +219,14 @@ final class AutoroutePassRunner {
         }
       }
 
+      router.clearanceDiagnostic.cleanup(router.board, "before_pass_cleanup");
       logTailRemoval(passNo, router.calculateIncompleteCount(router.board), true);
       if (router.removeUnconnectedVias) {
         router.removeTails(Item.StopConnectionOption.NONE);
       } else {
         router.removeTails(Item.StopConnectionOption.FANOUT_VIA);
       }
+      router.clearanceDiagnostic.cleanup(router.board, "after_pass_cleanup");
       logTailRemoval(passNo, router.calculateIncompleteCount(router.board), false);
 
       long finalStatisticsStart =

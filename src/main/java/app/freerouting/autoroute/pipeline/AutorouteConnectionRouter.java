@@ -130,6 +130,7 @@ final class AutorouteConnectionRouter {
       final AutorouteAttemptResult autorouteResult =
           autorouteEngine.autorouteConnection(
               routeStartSet, routeDestSet, autorouteControl, rippedItemList, ripupCosts);
+      router.clearanceDiagnostic.checkpoint(router.board, "after_insertion");
       if (BatchAutorouter.isBenchmarkProfileEnabled()) {
         router.addProfileMazeSearchNanos(System.nanoTime() - mazeSearchStart);
       }
@@ -149,6 +150,7 @@ final class AutorouteConnectionRouter {
             autorouteControl.traceCosts,
             router.thread,
             TIME_LIMIT_TO_PREVENT_ENDLESS_LOOP);
+        router.clearanceDiagnostic.checkpoint(router.board, "after_local_pull_tight");
         if (BatchAutorouter.isBenchmarkProfileEnabled()) {
           router.addProfileOptChangedAreaNanos(System.nanoTime() - pullTightStart);
         }
@@ -253,6 +255,7 @@ final class AutorouteConnectionRouter {
     AutorouteAttemptResult neckResult =
         neckEngine.autorouteConnection(
             routeStartSet, routeDestSet, neckControl, rippedItemList, ripupCosts);
+    router.clearanceDiagnostic.checkpoint(router.board, "after_necked_insertion");
     if (BatchAutorouter.isBenchmarkProfileEnabled()) {
       router.addProfileMazeSearchNanos(System.nanoTime() - neckMazeSearchStart);
     }
@@ -270,6 +273,7 @@ final class AutorouteConnectionRouter {
         neckControl.traceCosts,
         router.thread,
         TIME_LIMIT_TO_PREVENT_ENDLESS_LOOP);
+    router.clearanceDiagnostic.checkpoint(router.board, "after_necked_pull_tight");
     if (BatchAutorouter.isBenchmarkProfileEnabled()) {
       router.addProfileOptChangedAreaNanos(System.nanoTime() - neckPullTightStart);
     }

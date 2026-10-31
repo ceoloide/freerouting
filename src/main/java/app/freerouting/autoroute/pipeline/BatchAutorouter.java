@@ -79,6 +79,7 @@ public final class BatchAutorouter extends NamedAlgorithm {
   private final List<Item> reusablePlaneItemList = new ArrayList<>();
   private final List<Item> reusableSignalItemList = new ArrayList<>();
   private final Set<Item> reusableHandledItems = new TreeSet<>();
+  final TraceViaClearanceDiagnostic clearanceDiagnostic = new TraceViaClearanceDiagnostic();
   private final AutorouteConnectionRouter connectionRouter;
   private final AutoroutePassRunner passRunner;
   private final AutorouteBatchLoop batchLoop;
