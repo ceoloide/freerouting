@@ -8,6 +8,7 @@ import app.freerouting.board.facade.RoutingBoard;
 import app.freerouting.board.model.items.Via;
 import app.freerouting.board.model.structure.FixedState;
 import app.freerouting.board.trace.PolylineTrace;
+import app.freerouting.debug.RoutingMutationDiagnostic;
 import app.freerouting.geometry.planar.IntPoint;
 import app.freerouting.geometry.planar.IntVector;
 import app.freerouting.geometry.planar.Point;
@@ -147,5 +148,96 @@ class TraceViaClearanceDiagnosticTest {
     diagnostic.beginConnection(null, 1, 1, 1);
     diagnostic.cleanup(null, "after_pass_cleanup");
     assertTrue(lines.isEmpty());
+  }
+
+  @Test
+  void detailedScopeTracksTransientPairsAndViaMovementThroughTheConnection() {
+    PolylineTrace initialTrace = trace();
+    Via existingVia = via(net("PRIVATE_OTHER"), 6500);
+    TraceViaClearanceDiagnostic diagnostic =
+        new TraceViaClearanceDiagnostic(true, lines::add, 1, 7, existingVia.getId());
+    diagnostic.beginPass(board, 1);
+    diagnostic.beginConnection(board, 7, 7, net("PRIVATE_ACTIVE"));
+    try (var scope = diagnostic.observeInsertion(board)) {
+      existingVia.moveBy(
+          new IntVector(at(5577.8, 5000).x - existingVia.getCenter().toIntegerExact().x, 0));
+      RoutingMutationDiagnostic.checkpoint("after_raw_trace_insert");
+      diagnostic.checkpoint(board, "after_insertion");
+      board.removeItem(initialTrace);
+      RoutingMutationDiagnostic.checkpoint("after_trace_normalize");
+      trace();
+      RoutingMutationDiagnostic.checkpoint("after_insertion_pull_tight");
+    }
+    int finishedCount = lines.size();
+    RoutingMutationDiagnostic.checkpoint("outside_scope");
+    assertEquals(finishedCount, lines.size());
+    assertTrue(
+        lines.stream()
+            .anyMatch(
+                line ->
+                    line.contains("stage=after_raw_trace_insert")
+                        && line.contains("event=pair_appeared")
+                        && line.contains("via_moved_mm=0.922200")
+                        && line.contains("trace_existed_before_connection=true")));
+    assertTrue(
+        lines.stream()
+            .anyMatch(
+                line ->
+                    line.contains("stage=after_trace_normalize")
+                        && line.contains("event=pair_resolved")));
+    assertTrue(
+        lines.stream()
+            .anyMatch(
+                line ->
+                    line.contains("stage=after_insertion_pull_tight")
+                        && line.contains("event=pair_appeared")
+                        && line.contains("trace_existed_before_connection=false")));
+    assertTrue(lines.getLast().contains("event=detail_end"));
+    assertTrue(lines.getLast().contains("pairs_remaining=1"));
+  }
+
+  @Test
+  void detailedScopeOnlyArmsForTheSelectedPassAndConnection() {
+    TraceViaClearanceDiagnostic diagnostic =
+        new TraceViaClearanceDiagnostic(true, lines::add, 1, 7, 0);
+    diagnostic.beginPass(board, 1);
+    diagnostic.beginConnection(board, 6, 6, 1);
+    try (var scope = diagnostic.observeInsertion(board)) {
+      RoutingMutationDiagnostic.checkpoint("wrong_connection");
+    }
+    diagnostic.beginPass(board, 2);
+    diagnostic.beginConnection(board, 7, 7, 1);
+    try (var scope = diagnostic.observeInsertion(board)) {
+      RoutingMutationDiagnostic.checkpoint("wrong_pass");
+    }
+    assertTrue(lines.stream().noneMatch(line -> line.contains("event=detail_begin")));
+  }
+
+  @Test
+  void forcedInsertionPublishesNormalizationAndInternalPullTightBoundariesInOrder() {
+    List<String> stages = new ArrayList<>();
+    try (var scope = RoutingMutationDiagnostic.observe(stages::add)) {
+      Point end = at(8000, 4000);
+      Point inserted =
+          board.insertForcedTracePolyline(
+              new Polyline(new Point[] {at(5000, 4000), end}),
+              (int) board.communication.coordinateTransform.dsnToBoard(125),
+              0,
+              new int[] {net("PRIVATE_GND")},
+              1,
+              10,
+              10,
+              10,
+              Integer.MAX_VALUE,
+              500,
+              true,
+              null);
+      assertEquals(end, inserted);
+    }
+    assertTrue(stages.indexOf("after_raw_trace_insert") >= 0);
+    assertTrue(stages.indexOf("after_trace_combine") > stages.indexOf("after_raw_trace_insert"));
+    assertTrue(stages.indexOf("after_trace_normalize") > stages.indexOf("after_trace_combine"));
+    assertTrue(
+        stages.indexOf("after_insertion_pull_tight") > stages.indexOf("after_trace_normalize"));
   }
 }

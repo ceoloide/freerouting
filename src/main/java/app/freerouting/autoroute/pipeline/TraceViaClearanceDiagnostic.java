@@ -5,16 +5,21 @@ import app.freerouting.board.model.items.Item;
 import app.freerouting.board.model.items.Trace;
 import app.freerouting.board.model.items.Via;
 import app.freerouting.board.model.structure.Unit;
+import app.freerouting.debug.RoutingMutationDiagnostic;
 import app.freerouting.drc.ClearanceViolation;
 import app.freerouting.drc.DesignRulesChecker;
+import app.freerouting.geometry.planar.Point;
 import app.freerouting.logger.FRLogger;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.function.Consumer;
 
 /**
@@ -32,14 +37,30 @@ final class TraceViaClearanceDiagnostic {
   private int connection;
   private int totalConnection;
   private int activeNet;
+  private final int detailPass;
+  private final int detailConnection;
+  private final int watchViaId;
 
   TraceViaClearanceDiagnostic() {
-    this(Boolean.getBoolean(PROPERTY), FRLogger::info);
+    this(
+        Boolean.getBoolean(PROPERTY),
+        FRLogger::info,
+        Integer.getInteger(PROPERTY + ".pass", 1),
+        Integer.getInteger(PROPERTY + ".connection", 0),
+        Integer.getInteger(PROPERTY + ".watch_via_id", 0));
   }
 
   TraceViaClearanceDiagnostic(boolean enabled, Consumer<String> log) {
+    this(enabled, log, 1, 0, 0);
+  }
+
+  TraceViaClearanceDiagnostic(
+      boolean enabled, Consumer<String> log, int detailPass, int detailConnection, int watchViaId) {
     this.enabled = enabled;
     this.log = log;
+    this.detailPass = detailPass;
+    this.detailConnection = detailConnection;
+    this.watchViaId = watchViaId;
   }
 
   void beginPass(RoutingBoard board, int pass) {
@@ -54,6 +75,141 @@ final class TraceViaClearanceDiagnostic {
     this.totalConnection = totalConnection;
     this.activeNet = activeNet;
     checkpoint(board, "before_connection");
+  }
+
+  RoutingMutationDiagnostic.Scope observeInsertion(RoutingBoard board) {
+    if (!enabled || reported || pass != detailPass || connection != detailConnection) {
+      return () -> {};
+    }
+    try {
+      DetailedObservation observation = new DetailedObservation(board);
+      observation.checkpoint("detail_begin");
+      RoutingMutationDiagnostic.Scope scope =
+          RoutingMutationDiagnostic.observe(observation::checkpoint);
+      return () -> {
+        try {
+          observation.checkpoint("detail_end");
+        } finally {
+          scope.close();
+        }
+      };
+    } catch (RuntimeException exception) {
+      enabled = false;
+      log.accept(
+          prefix("detail_begin")
+              + " event=diagnostic_disabled error="
+              + exception.getClass().getSimpleName());
+      return () -> {};
+    }
+  }
+
+  private final class DetailedObservation {
+    private final RoutingBoard board;
+    private final Map<Integer, Point> viaCenters = new HashMap<>();
+    private final Set<Integer> initialItemIds = new HashSet<>();
+    private final Map<Pair, String> previous = new HashMap<>();
+    private int checkpointIndex;
+    private boolean failed;
+
+    DetailedObservation(RoutingBoard board) {
+      this.board = board;
+      for (Item item : board.getItems()) {
+        initialItemIds.add(item.getId());
+        if (item instanceof Via via) {
+          viaCenters.put(via.getId(), via.getCenter());
+        }
+      }
+    }
+
+    void checkpoint(String stage) {
+      if (failed) {
+        return;
+      }
+      try {
+        Map<Pair, String> current = new HashMap<>();
+        for (ClearanceViolation violation : traceViaViolations(board)) {
+          Trace trace =
+              (Trace)
+                  (violation.firstItem instanceof Trace
+                      ? violation.firstItem
+                      : violation.secondItem);
+          Via via =
+              (Via)
+                  (violation.firstItem instanceof Via ? violation.firstItem : violation.secondItem);
+          if (watchViaId > 0 && via.getId() != watchViaId) {
+            continue;
+          }
+          Point oldCenter = viaCenters.get(via.getId());
+          String details =
+              String.format(
+                  Locale.ROOT,
+                  " layer=%d trace_id=%d trace_nets=%s trace_class=%d via_id=%d via_nets=%s via_class=%d"
+                      + " expected_mm=%.6f actual_mm=%.6f trace_width_mm=%.6f"
+                      + " trace_existed_before_connection=%s via_existed_before_connection=%s via_moved_mm=%.6f",
+                  violation.layer,
+                  trace.getId(),
+                  nets(trace),
+                  trace.clearanceClassIndex(),
+                  via.getId(),
+                  nets(via),
+                  via.clearanceClassIndex(),
+                  mm(board, violation.expectedClearance),
+                  mm(board, violation.actualClearance),
+                  mm(board, 2.0 * trace.getHalfWidth()),
+                  initialItemIds.contains(trace.getId()),
+                  oldCenter != null,
+                  oldCenter == null
+                      ? 0
+                      : mm(board, oldCenter.toFloat().distance(via.getCenter().toFloat())));
+          current.put(Pair.of(violation), details);
+        }
+        String prefix =
+            TraceViaClearanceDiagnostic.this.prefix(stage) + " checkpoint=" + ++checkpointIndex;
+        for (var entry : sorted(current)) {
+          String old = previous.get(entry.getKey());
+          if (!entry.getValue().equals(old)) {
+            log.accept(
+                prefix
+                    + " event="
+                    + (old == null ? "pair_appeared" : "pair_changed")
+                    + entry.getValue());
+          }
+        }
+        for (var entry : sorted(previous)) {
+          if (!current.containsKey(entry.getKey())) {
+            log.accept(prefix + " event=pair_resolved" + entry.getValue());
+          }
+        }
+        previous.clear();
+        previous.putAll(current);
+        if ("detail_begin".equals(stage) || "detail_end".equals(stage)) {
+          log.accept(
+              prefix
+                  + " event="
+                  + stage
+                  + " watch_via_id="
+                  + watchViaId
+                  + " watched_via_present="
+                  + (board.getItem(watchViaId) instanceof Via)
+                  + " pairs_remaining="
+                  + current.size());
+        }
+      } catch (RuntimeException exception) {
+        failed = true;
+        log.accept(
+            prefix(stage) + " event=detail_disabled error=" + exception.getClass().getSimpleName());
+      }
+    }
+  }
+
+  private static Set<Map.Entry<Pair, String>> sorted(Map<Pair, String> values) {
+    Map<Pair, String> sorted =
+        new TreeMap<>(
+            Comparator.comparingInt(Pair::first)
+                .thenComparingInt(Pair::second)
+                .thenComparingInt(Pair::layer));
+    sorted.putAll(values);
+    return sorted.entrySet();
   }
 
   void cleanup(RoutingBoard board, String stage) {

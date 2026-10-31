@@ -488,6 +488,12 @@ insertion, local pull-tight, connection bookkeeping, and pass-cleanup boundaries
 first foreign-net trace/via pair absent from its initial baseline, without rollback or route
 rejection. See [the diagnostic instructions](developer/trace-via-diagnostic.md).
 
+For a selected connection, `debug.RoutingMutationDiagnostic` provides a thread-scoped callback
+bridge from insertion internals to that observer. The bridge carries stage names only; board
+and insertion code do not depend on pipeline diagnostics or change policy in response to them.
+The detailed observer follows transient pair appearance and resolution across shoving,
+normalization, and insertion-internal pull-tight, then releases the callback at connection end.
+
 #### Preserved Traces and Centerline Junction Connectivity
 
 Preserved traces (`USER_FIXED` and `SYSTEM_FIXED`, such as KiCad footprint tracks or SPECCTRA DSN `route`/`fix` wires) must retain their exact geometry without mutation or splitting throughout routing, normalization, and export:

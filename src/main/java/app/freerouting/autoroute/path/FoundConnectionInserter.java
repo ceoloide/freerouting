@@ -12,6 +12,7 @@ import app.freerouting.board.model.items.Trace;
 import app.freerouting.board.model.items.Via;
 import app.freerouting.board.trace.PolylineTrace;
 import app.freerouting.core.library.Padstack;
+import app.freerouting.debug.RoutingMutationDiagnostic;
 import app.freerouting.geometry.planar.FloatPoint;
 import app.freerouting.geometry.planar.IntPoint;
 import app.freerouting.geometry.planar.Point;
@@ -115,32 +116,48 @@ public final class FoundConnectionInserter {
                 + ", end="
                 + formatPoint(endCorner));
       }
-      if (!newInstance.insertVia(currentNewItem.corners[0], currentLayer, currentNewItem.layer)) {
+      boolean viaInserted =
+          newInstance.insertVia(currentNewItem.corners[0], currentLayer, currentNewItem.layer);
+      RoutingMutationDiagnostic.checkpoint("after_planned_via");
+      if (!viaInserted) {
         return null;
       }
       currentLayer = currentNewItem.layer;
-      if (!newInstance.insertTrace(currentNewItem)) {
+      boolean traceInserted = newInstance.insertTrace(currentNewItem);
+      RoutingMutationDiagnostic.checkpoint("after_planned_trace");
+      if (!traceInserted) {
         return null;
       }
     }
-    if (!newInstance.insertVia(newInstance.lastCorner, currentLayer, startLayer)) {
+    boolean finalViaInserted =
+        newInstance.insertVia(newInstance.lastCorner, currentLayer, startLayer);
+    RoutingMutationDiagnostic.checkpoint("after_final_via");
+    if (!finalViaInserted) {
       return null;
     }
-    if (targetItem instanceof PolylineTrace toTrace
-        && !board.connectToTrace(
-            newInstance.firstCorner,
-            toTrace,
-            ctrl.traceHalfWidth[targetLayer],
-            ctrl.traceClearanceClassIndex)) {
-      return null;
+    if (targetItem instanceof PolylineTrace toTrace) {
+      boolean connected =
+          board.connectToTrace(
+              newInstance.firstCorner,
+              toTrace,
+              ctrl.traceHalfWidth[targetLayer],
+              ctrl.traceClearanceClassIndex);
+      RoutingMutationDiagnostic.checkpoint("after_target_attachment");
+      if (!connected) {
+        return null;
+      }
     }
-    if (startItem instanceof PolylineTrace toTrace
-        && !board.connectToTrace(
-            newInstance.lastCorner,
-            toTrace,
-            ctrl.traceHalfWidth[startLayer],
-            ctrl.traceClearanceClassIndex)) {
-      return null;
+    if (startItem instanceof PolylineTrace toTrace) {
+      boolean connected =
+          board.connectToTrace(
+              newInstance.lastCorner,
+              toTrace,
+              ctrl.traceHalfWidth[startLayer],
+              ctrl.traceClearanceClassIndex);
+      RoutingMutationDiagnostic.checkpoint("after_start_attachment");
+      if (!connected) {
+        return null;
+      }
     }
 
     // A new bridge can look like a tail until its exact endpoint attachments are complete.
@@ -148,7 +165,9 @@ public final class FoundConnectionInserter {
       newInstance.removeTraceStubs(segment);
     }
 
+    RoutingMutationDiagnostic.checkpoint("after_stub_cleanup");
     board.normalizeTraces(ctrl.netNumber);
+    RoutingMutationDiagnostic.checkpoint("after_connection_normalize");
     if (!newInstance.connectsTerminals(startAnchor, targetAnchor)) {
       FRLogger.trace(
           "FoundConnectionInserter.insertSegments",

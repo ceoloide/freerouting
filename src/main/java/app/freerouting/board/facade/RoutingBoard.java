@@ -34,6 +34,7 @@ import app.freerouting.core.scoring.BoardStatistics;
 import app.freerouting.datastructures.Stoppable;
 import app.freerouting.datastructures.TimeLimit;
 import app.freerouting.datastructures.UndoableObjects;
+import app.freerouting.debug.RoutingMutationDiagnostic;
 import app.freerouting.geometry.planar.FloatPoint;
 import app.freerouting.geometry.planar.IntBox;
 import app.freerouting.geometry.planar.IntOctagon;
@@ -476,6 +477,7 @@ public class RoutingBoard extends BasicBoard implements Serializable {
       int pullTightAccuracy,
       boolean withCheck,
       TimeLimit timeLimit) {
+    RoutingMutationDiagnostic.checkpoint("before_forced_trace");
     clearShoveFailingObstacle();
     Point fromCorner = polyline.firstCorner();
     Point toCorner = polyline.lastCorner();
@@ -623,6 +625,7 @@ public class RoutingBoard extends BasicBoard implements Serializable {
                 + ", delta="
                 + (idAfterShove - idBeforeShove));
       }
+      RoutingMutationDiagnostic.checkpoint("after_shove_shape");
       if (!insertOk) {
         return null;
       }
@@ -749,6 +752,7 @@ public class RoutingBoard extends BasicBoard implements Serializable {
               maxRecursionDepth,
               maxViaRecursionDepth,
               maxSpringOverRecursionDepth);
+      RoutingMutationDiagnostic.checkpoint("after_shove_shape");
       if (!insertOk) {
         FRLogger.trace("RoutingBoard.insert_forced_trace_polyline: shove trace failed");
         return null;
@@ -762,8 +766,10 @@ public class RoutingBoard extends BasicBoard implements Serializable {
     PolylineTrace newTrace =
         insertTraceWithoutCleaning(
             newPolyline, layer, halfWidth, netNumbers, clearanceClassIndex, FixedState.UNFIXED);
+    RoutingMutationDiagnostic.checkpoint("after_raw_trace_insert");
     int idAfterInsert = communication.idGenerator.maxGeneratedId();
     boolean combineResult = newTrace.combine();
+    RoutingMutationDiagnostic.checkpoint("after_trace_combine");
     int idAfterCombine = communication.idGenerator.maxGeneratedId();
     if (netNumbers != null && netNumbers.length > 0) {
       FRLogger.trace(
@@ -799,6 +805,7 @@ public class RoutingBoard extends BasicBoard implements Serializable {
       // correctly.
       int idBeforeNorm = communication.idGenerator.maxGeneratedId();
       boolean normalizeResult = newTrace != null && newTrace.normalize(changedArea.getArea(layer));
+      RoutingMutationDiagnostic.checkpoint("after_trace_normalize");
       int idAfterNorm = communication.idGenerator.maxGeneratedId();
       if (netNumbers != null && netNumbers.length > 0) {
         FRLogger.trace(
@@ -817,6 +824,7 @@ public class RoutingBoard extends BasicBoard implements Serializable {
 
         int idBeforeSplit = communication.idGenerator.maxGeneratedId();
         pullTightAlgo.splitTracesAtKeepPoint();
+        RoutingMutationDiagnostic.checkpoint("after_keep_point_split");
         int idAfterSplit = communication.idGenerator.maxGeneratedId();
         if (netNumbers != null && netNumbers.length > 0) {
           FRLogger.trace(
@@ -867,9 +875,11 @@ public class RoutingBoard extends BasicBoard implements Serializable {
               + ", newCorner="
               + newCorner);
     }
+    RoutingMutationDiagnostic.checkpoint("before_insertion_pull_tight");
     if (tidyWidth > 0 && newTrace != null) {
       newTrace.pullTight(pullTightAlgo);
     }
+    RoutingMutationDiagnostic.checkpoint("after_insertion_pull_tight");
     if (netNumbers != null && netNumbers.length > 0) {
       ItemSelectionFilter dbgFilter =
           new ItemSelectionFilter(ItemSelectionFilter.SelectableChoices.TRACES);

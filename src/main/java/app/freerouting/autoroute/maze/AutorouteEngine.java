@@ -21,6 +21,7 @@ import app.freerouting.board.searchtree.SearchTreeObject;
 import app.freerouting.board.searchtree.ShapeSearchTree;
 import app.freerouting.datastructures.Stoppable;
 import app.freerouting.datastructures.TimeLimit;
+import app.freerouting.debug.RoutingMutationDiagnostic;
 import app.freerouting.geometry.planar.IntBox;
 import app.freerouting.geometry.planar.Line;
 import app.freerouting.geometry.planar.Simplex;
@@ -239,9 +240,12 @@ public class AutorouteEngine {
     if (observersActivated) {
       this.board.startNotifyObservers();
     }
+    RoutingMutationDiagnostic.checkpoint("before_ripup");
     ripConnections(board, rippedItemList, ctrl.removeUnconnectedVias);
+    RoutingMutationDiagnostic.checkpoint("after_ripup");
     FoundConnectionInserter insertFoundConnectionAlgo =
         FoundConnectionInserter.getInstance(autorouteResult, board, ctrl);
+    RoutingMutationDiagnostic.checkpoint("after_connection_inserter");
 
     if (observersActivated) {
       this.board.endNotifyObservers();

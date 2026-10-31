@@ -153,13 +153,16 @@ final class AutoroutePassRunner {
 
           long routeItemStart = BatchAutorouter.isBenchmarkProfileEnabled() ? System.nanoTime() : 0;
           PerformanceProfiler.start("autoroute_item");
-          final AutorouteAttemptResult autorouterResult =
-              router.autorouteItem(
-                  currentItem,
-                  currentItem.getNetNumber(i),
-                  rippedItemList,
-                  rippedItemCosts,
-                  passNo);
+          final AutorouteAttemptResult autorouterResult;
+          try (var observation = router.clearanceDiagnostic.observeInsertion(router.board)) {
+            autorouterResult =
+                router.autorouteItem(
+                    currentItem,
+                    currentItem.getNetNumber(i),
+                    rippedItemList,
+                    rippedItemCosts,
+                    passNo);
+          }
           PerformanceProfiler.end("autoroute_item");
           if (BatchAutorouter.isBenchmarkProfileEnabled()) {
             router.profileAutorouteItemNanos += System.nanoTime() - routeItemStart;
