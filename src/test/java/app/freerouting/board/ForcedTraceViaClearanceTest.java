@@ -9,6 +9,8 @@ import app.freerouting.Freerouting;
 import app.freerouting.board.facade.RoutingBoard;
 import app.freerouting.board.model.structure.FixedState;
 import app.freerouting.drc.DesignRulesChecker;
+import app.freerouting.geometry.planar.Circle;
+import app.freerouting.geometry.planar.ConvexShape;
 import app.freerouting.geometry.planar.IntPoint;
 import app.freerouting.geometry.planar.Point;
 import app.freerouting.geometry.planar.Polyline;
@@ -175,6 +177,89 @@ class ForcedTraceViaClearanceTest {
         FixedState.UNFIXED,
         false);
     assertEquals(at(board, 6254.6, 3000), insert(board, 6254.6, true));
+    assertTrue(new DesignRulesChecker(board, null).getAllClearanceViolations().isEmpty());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void rejectsUnsafeShoveWithCompensationInEitherCopperMode(boolean exactCopper) {
+    RoutingBoard board = board(6254.6);
+    board.rules.setExactCopper(exactCopper);
+    board.searchTreeManager.setClearanceCompensationUsed(true);
+    board.insertVia(
+        board.library.getViaPadstack("V"),
+        at(board, 5921.3, 5000),
+        new int[] {2},
+        1,
+        FixedState.UNFIXED,
+        false);
+    assertNull(insert(board, 6254.6, true));
+    assertTrue(new DesignRulesChecker(board, null).getAllClearanceViolations().isEmpty());
+  }
+
+  @ParameterizedTest
+  @ValueSource(booleans = {false, true})
+  void acceptsLegalShoveWithCompensationInEitherCopperMode(boolean exactCopper) {
+    RoutingBoard board = board(6600);
+    board.rules.setExactCopper(exactCopper);
+    board.searchTreeManager.setClearanceCompensationUsed(true);
+    board.insertVia(
+        board.library.getViaPadstack("V"),
+        at(board, 6400, 5000),
+        new int[] {2},
+        1,
+        FixedState.UNFIXED,
+        false);
+    assertEquals(at(board, 6600, 3000), insert(board, 6600, true));
+    assertTrue(new DesignRulesChecker(board, null).getAllClearanceViolations().isEmpty());
+  }
+
+  @Test
+  void ignoresViaCopperOnAnotherLayer() {
+    RoutingBoard board = board(6254.6);
+    ConvexShape[] shapes = new ConvexShape[2];
+    shapes[1] =
+        new Circle(
+            new IntPoint(0, 0), (int) board.communication.coordinateTransform.dsnToBoard(300));
+    var padstack = board.library.padstacks.add("bottom_only", shapes, false, false);
+    var via =
+        board.insertVia(
+            padstack, at(board, 5921.3, 5000), new int[] {2}, 1, FixedState.UNFIXED, false);
+    Point before = via.getCenter();
+    assertEquals(at(board, 6254.6, 3000), insert(board, 6254.6, true));
+    assertEquals(before, via.getCenter());
+    assertTrue(new DesignRulesChecker(board, null).getAllClearanceViolations().isEmpty());
+  }
+
+  @Test
+  void failedInsertionAllowsLaterLegalRoutingOnTheSameBoard() {
+    RoutingBoard board = board(6254.6);
+    board.insertVia(
+        board.library.getViaPadstack("V"),
+        at(board, 5921.3, 5000),
+        new int[] {2},
+        1,
+        FixedState.UNFIXED,
+        false);
+    assertNull(insert(board, 6254.6, true));
+    assertEquals(1, new DesignRulesChecker(board, null).getIncompleteCount());
+    Point target = at(board, 6254.6, 7000);
+    Point reached =
+        board.insertForcedTracePolyline(
+            new Polyline(at(board, 5000, 7000), target),
+            (int) board.communication.coordinateTransform.dsnToBoard(125),
+            0,
+            new int[] {1},
+            1,
+            10,
+            10,
+            10,
+            Integer.MAX_VALUE,
+            500,
+            true,
+            null);
+    assertEquals(target, reached);
+    assertEquals(0, new DesignRulesChecker(board, null).getIncompleteCount());
     assertTrue(new DesignRulesChecker(board, null).getAllClearanceViolations().isEmpty());
   }
 }
