@@ -35,6 +35,7 @@ import java.awt.Graphics;
 import java.io.ByteArrayOutputStream;
 import java.lang.management.ManagementFactory;
 import java.time.Instant;
+import java.util.List;
 
 /**
  * Interactive thread managing the combined execution of batch autorouting and route optimization.
@@ -555,6 +556,9 @@ public class GuiRoutingJobWorker extends InteractiveActionThread {
     for (ThreadActionListener hl : this.listeners) {
       hl.autorouterStarted();
     }
+    for (ThreadActionListener listener : this.sessionListeners) {
+      listener.autorouterStarted();
+    }
 
     FRLogger.traceEntry("BatchAutorouterThread.thread_action()");
     try {
@@ -674,17 +678,34 @@ public class GuiRoutingJobWorker extends InteractiveActionThread {
                 ? terminalText.getText("interrupted")
                 : terminalText.getText("completed"),
             Integer.toString(incompleteCount));
-    sessionPort.finishRoute(
-        new RouteCompletion(
-            generation, this.isStopRequested(), terminalStatus, incompleteCount, true, true));
-
-    for (ThreadActionListener hl : this.listeners) {
-      if (this.isStopRequested()) {
-        hl.autorouterAborted();
+    boolean stopped = this.isStopRequested();
+    // Complete worker-owned persistence before an automatic export can exit the application.
+    for (ThreadActionListener listener : this.listeners) {
+      if (stopped) {
+        listener.autorouterAborted();
       } else {
-        hl.autorouterFinished();
+        listener.autorouterFinished();
       }
     }
+
+    List<ThreadActionListener> completionListeners = List.copyOf(this.sessionListeners);
+    sessionPort.finishRoute(
+        new RouteCompletion(
+            generation,
+            stopped,
+            terminalStatus,
+            incompleteCount,
+            true,
+            true,
+            () -> {
+              for (ThreadActionListener listener : completionListeners) {
+                if (stopped) {
+                  listener.autorouterAborted();
+                } else {
+                  listener.autorouterFinished();
+                }
+              }
+            }));
 
     // Record job lifecycle event for GUI execution
     JobLifecycleStatus lifecycleStatus =

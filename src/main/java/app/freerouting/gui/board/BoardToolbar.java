@@ -13,7 +13,6 @@ import app.freerouting.gui.controls.SegmentedButtons;
 import app.freerouting.gui.support.GuiTextManager;
 import app.freerouting.gui.workspace.session.EditorStateHandle;
 import app.freerouting.gui.workspace.session.EditorStateKind;
-import app.freerouting.gui.workspace.session.InteractiveActionThread;
 import app.freerouting.logger.FRLogger;
 import app.freerouting.management.jobs.RoutingJobScheduler;
 import app.freerouting.management.sessions.SessionManager;
@@ -208,15 +207,7 @@ public class BoardToolbar extends JPanel {
           if (routingBoard != null) {
             guiRoutingJob.routerSettings.applyBoardSpecificOptimizationsIfNeeded(routingBoard);
           }
-          InteractiveActionThread thread =
-              boardFrame.boardPanel.boardHandling.startAutorouterAndRouteOptimizer(guiRoutingJob);
-
-          if ((thread != null)
-              && (boardFrame.boardPanel.boardHandling.autorouterListener != null)) {
-            // Add the auto-router listener to save the design file when the auto-router is
-            // running
-            thread.addListener(boardFrame.boardPanel.boardHandling.autorouterListener);
-          }
+          boardFrame.boardPanel.boardHandling.startAutorouterAndRouteOptimizer(guiRoutingJob);
 
           if (Freerouting.globalSettings.debugSettings.singleStepExecution) {
             app.freerouting.debug.DebugControl.getInstance().reset();

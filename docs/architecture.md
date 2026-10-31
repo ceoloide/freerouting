@@ -590,6 +590,9 @@ After the GUI pipeline finishes, `GuiRoutingJobWorker` publishes the final `Rout
 through the generation-checked workspace port, including a copied board selected by fallback
 when no optimizer callback runs. GUI automatic export is queued on the EDT after that board
 replacement, so the session manager and exported geometry use the selected result.
+The automatic export listener is registered before the worker starts, and its completion action
+runs inside the workspace port's generation check. A newer board load or routing run suppresses
+the old run's queued export. General worker listeners retain their existing callback behavior.
 
 The GUI rendering path is intentionally one-way: `GuiBoardManager` invokes `gui.rendering.BoardRenderer`,
 which reads the headless board model and paints the current view. The opt-in expansion-test view

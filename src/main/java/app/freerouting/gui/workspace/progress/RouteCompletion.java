@@ -9,4 +9,24 @@ public record RouteCompletion(
     String statusMessage,
     int incompleteCount,
     boolean restoreRatsNest,
-    boolean refreshWindows) {}
+    boolean refreshWindows,
+    Runnable completionAction) {
+
+  /** Creates a terminal update without an automatic completion action. */
+  public RouteCompletion(
+      RunGeneration generation,
+      boolean cancelled,
+      String statusMessage,
+      int incompleteCount,
+      boolean restoreRatsNest,
+      boolean refreshWindows) {
+    this(
+        generation,
+        cancelled,
+        statusMessage,
+        incompleteCount,
+        restoreRatsNest,
+        refreshWindows,
+        null);
+  }
+}

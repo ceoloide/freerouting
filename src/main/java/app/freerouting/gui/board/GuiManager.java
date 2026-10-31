@@ -8,7 +8,6 @@ import app.freerouting.gui.rendering.TutorialBoardPalette;
 import app.freerouting.gui.windows.board.WindowBase;
 import app.freerouting.gui.windows.board.WindowMessage;
 import app.freerouting.gui.workspace.GuiBoardManager;
-import app.freerouting.gui.workspace.session.InteractiveActionThread;
 import app.freerouting.io.FileFormat;
 import app.freerouting.io.specctra.RulesReader;
 import app.freerouting.io.specctra.SesImportSummary;
@@ -308,14 +307,7 @@ public class GuiManager {
           // Start the auto-router
           // Note: routingJob.routerSettings already has CLI settings applied in line
           // 87-91
-          InteractiveActionThread thread =
-              newFrame.boardPanel.boardHandling.startAutorouterAndRouteOptimizer(routingJob);
-
-          if (newFrame.boardPanel.boardHandling.autorouterListener != null) {
-            // Add the auto-router listener to save the design file when the autorouter is
-            // running
-            thread.addListener(newFrame.boardPanel.boardHandling.autorouterListener);
-          }
+          newFrame.boardPanel.boardHandling.startAutorouterAndRouteOptimizer(routingJob);
 
           globalSettings.guiSettings.exitWhenFinished = true;
         }

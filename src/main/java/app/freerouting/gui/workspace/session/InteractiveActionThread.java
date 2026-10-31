@@ -123,6 +123,9 @@ public abstract class InteractiveActionThread extends StoppableThread {
    */
   protected List<ThreadActionListener> listeners = new ArrayList<>();
 
+  /** Completion listeners owned by the current GUI run. */
+  protected final List<ThreadActionListener> sessionListeners = new ArrayList<>();
+
   /**
    * Creates a new interactive action thread for the specified session port and run.
    *
@@ -271,6 +274,16 @@ public abstract class InteractiveActionThread extends StoppableThread {
    */
   public void addListener(ThreadActionListener toAdd) {
     listeners.add(toAdd);
+  }
+
+  /**
+   * Registers completion callbacks that run on the EDT only while this GUI run is current. Register
+   * these listeners before starting the worker.
+   *
+   * @param toAdd the session-owned listener
+   */
+  public void addSessionListener(ThreadActionListener toAdd) {
+    sessionListeners.add(toAdd);
   }
 
   /**

@@ -215,6 +215,9 @@ public final class WorkspacePortAdapter implements WorkspacePort {
           }
           manager.repaint();
           activeRun = null;
+          if (completion.completionAction() != null) {
+            completion.completionAction().run();
+          }
         });
   }
 

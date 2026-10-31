@@ -13,6 +13,6 @@ public interface RouteControlPort {
   /** Requests a stop while leaving terminal cleanup to the worker. */
   public void requestStop(RunGeneration generation);
 
-  /** Completes the run and performs terminal EDT cleanup. */
+  /** Completes the current run, performs EDT cleanup, and invokes its session completion action. */
   public void finishRoute(RouteCompletion completion);
 }

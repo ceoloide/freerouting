@@ -32,6 +32,9 @@ public final class GuiBoardRoutingActions {
     InteractiveActionThread worker =
         InteractiveActionThread.getAutorouterAndRouteOptimizerInstance(
             manager.getSessionPort(), generation, job);
+    if (manager.autorouterListener != null) {
+      worker.addSessionListener(manager.autorouterListener);
+    }
     manager.setInteractiveActionThread(worker);
     worker.start();
     return worker;
