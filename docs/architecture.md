@@ -481,6 +481,12 @@ The autorouter is the "make it work" stage. It solves missing connections one at
 
 The autorouter may also temporarily rip up nearby conflicting traces or vias if needed to find a legal route. Its job is to turn an incomplete design into one that is electrically connected.
 
+Forced polyline insertion shoves its offset shapes before committing the new copper. After all
+shoves, it checks the whole pending polyline against foreign-net vias: moving a via for a later
+leg must not leave it inside an earlier pending leg. A conflicting insertion is rejected before
+the new copper is written. This safety check does not choose another via position or roll back
+legal shoves already performed; the caller handles the failed insertion.
+
 The autorouter's local pull-tight and pass-end cleanup still run when the separate optimizer
 stage is disabled. For a routing-generated trace/via violation, the opt-in
 `TraceViaClearanceDiagnostic` in `autoroute.pipeline` checks comprehensive DRC at connection

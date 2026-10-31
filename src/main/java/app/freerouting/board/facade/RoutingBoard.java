@@ -758,6 +758,12 @@ public class RoutingBoard extends BasicBoard implements Serializable {
         return null;
       }
     }
+    // A later shape can shove a via back into an earlier shape of this pending polyline.
+    // Those shapes are not board copper yet, so the drill mover cannot check them itself.
+    if (!pendingTraceClearsForeignVias(
+        newPolyline, halfWidth, layer, netNumbers, clearanceClassIndex)) {
+      return null;
+    }
     // insert the new trace segment
     for (int i = 0; i < newPolyline.cornerCount(); i++) {
       joinChangedArea(newPolyline.cornerApprox(i), layer);
@@ -893,6 +899,29 @@ public class RoutingBoard extends BasicBoard implements Serializable {
               + newCorner);
     }
     return newCorner;
+  }
+
+  private boolean pendingTraceClearsForeignVias(
+      Polyline polyline, int halfWidth, int layer, int[] netNumbers, int clearanceClassIndex) {
+    ShapeSearchTree tree = searchTreeManager.getDefaultTree();
+    int preparedHalfWidth = halfWidth + tree.clearanceCompensationValue(clearanceClassIndex, layer);
+    for (TileShape shape : polyline.offsetShapes(preparedHalfWidth)) {
+      for (Item obstacle :
+          tree.overlappingItemsWithClearance(shape, layer, netNumbers, clearanceClassIndex)) {
+        if (obstacle instanceof Via via && !via.sharesNetNo(netNumbers)) {
+          setShoveFailingObstacle(via);
+          setShoveFailingLayer(layer);
+          FRLogger.trace(
+              "RoutingBoard.insertForcedTracePolyline",
+              "pending_trace_clearance",
+              "A shoved via still overlaps the pending trace corridor; insertion rejected",
+              (netNumbers.length > 0 ? "Net #" + netNumbers[0] + "," : "") + "Via #" + via.getId(),
+              new Point[] {via.getCenter()});
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /**
