@@ -523,12 +523,19 @@ public class GuiManager {
   /**
    * Exports the current state of the board in {@code newFrame} to {@code filename}.
    *
+   * <p>Worker calls are queued on the EDT after pending session-board replacements.
+   *
    * @param newFrame the board frame containing the board to export
    * @param filename the path of the destination file
    * @param exitWhenFinished whether to exit the JVM after export
    */
   public static void exportBoardToFile(
       BoardFrame newFrame, String filename, boolean exitWhenFinished) {
+    if (!SwingUtilities.isEventDispatchThread()) {
+      // Run after previously queued session-board replacements from the routing worker.
+      SwingUtilities.invokeLater(() -> exportBoardToFile(newFrame, filename, exitWhenFinished));
+      return;
+    }
     if (filename == null) {
       FRLogger.warn("Couldn't export board, filename not specified");
       return;

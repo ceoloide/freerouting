@@ -574,6 +574,11 @@ The interactive editor is split between GUI window/shell packages, `gui.workspac
 
 When diagnosing user interaction, rendering, or editor state, begin here.
 
+After the GUI pipeline finishes, `GuiRoutingJobWorker` publishes the final `RoutingJob.board`
+through the generation-checked workspace port, including a copied board selected by fallback
+when no optimizer callback runs. GUI automatic export is queued on the EDT after that board
+replacement, so the session manager and exported geometry use the selected result.
+
 The GUI rendering path is intentionally one-way: `GuiBoardManager` invokes `gui.rendering.BoardRenderer`,
 which reads the headless board model and paints the current view. The opt-in expansion-test view
 passes headless `AutorouteDiagnostic` snapshots to `AutorouteDiagnosticRenderer`; normal autorouting

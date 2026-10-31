@@ -624,6 +624,9 @@ public class GuiRoutingJobWorker extends InteractiveActionThread {
             }
           });
       this.pipeline.run();
+      // Fallback can select a copied board without any optimizer board-update callback.
+      // Publish the final pipeline board before completion unlocks or exports the GUI session.
+      sessionPort.replaceBoard(new BoardReplacement(generation, routingJob.board));
 
       // Save the result to the output field as a Specctra SES file
       if (routingJob.output.format == FileFormat.SES) {
